@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>D4N G</title>
-    <link>http://d4ng.net/</link>
+    <link>/</link>
     <description>Recent content on D4N G</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
     
     <lastBuildDate>Fri, 18 Apr 2014 23:00:21 -0800</lastBuildDate>
-    <atom:link href="http://d4ng.net/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Learning D3 by building a Cartesian grid plugin</title>
-      <link>http://d4ng.net/2014/d3-grid/</link>
+      <link>/2014/d3-grid/</link>
       <pubDate>Fri, 18 Apr 2014 23:00:21 -0800</pubDate>
       
-      <guid>http://d4ng.net/2014/d3-grid/</guid>
+      <guid>/2014/d3-grid/</guid>
       <description>&lt;p&gt;&lt;a href=&#34;//d3js.org&#34;&gt;D3&lt;/a&gt; is a JavaScript library that&amp;rsquo;s aimed at helping you make visualizations of data. It makes use of some powerful and challenging ideas, like declarative data binding to produce enter, update, and exit selections, and parity between transitions and selections. Getting started with D3 is quick and easy because of the wealth of examples that Mike Bostock and others have produced, but as I began to work on implementing my own reusable components, I had a hard time understanding how to modify or extend some of the behaviors that have become a hallmark of the library, in particular the &lt;a href=&#34;https://github.com/mbostock/d3/wiki/SVG-Axes&#34;&gt;&lt;code&gt;axis&lt;/code&gt; component&lt;/a&gt;.&lt;/p&gt;
 
 &lt;div id=&#34;axis-example&#34; class=&#34;marginal&#34;&gt;&lt;/div&gt;
