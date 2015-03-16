@@ -1,0 +1,79 @@
+/*@import url(http://fonts.googleapis.com/css?family=Josefin+Slab:100|Port+Lligat+Slab|Noticia+Text:400,700,400italic,700italic);*/
+@import url(http://fonts.googleapis.com/css?family=Macondo+Swash+Caps|Poiret+One|PT+Serif:400,700,400italic,700italic);
+
+html {
+    /*background: url(/res/creampaper.png);*/
+}
+
+body {
+    font-size: 1em;
+    margin: 4em auto 8em auto;
+    width: 960px;
+    /*font-family: 'Noticia Text', serif;*/
+    font-family: 'PT Serif', serif;
+    line-height: 1.5;
+    position: relative; /* So we can absolutely position descendants */
+}
+
+body > * {
+    width: 640px;
+}
+
+.fullwidth, body > header {
+    width: auto;
+}
+
+header h1 {
+    /*font: 100 normal 4em 'Josefin Slab';*/
+    font-family: 'Poiret One', cursive;
+    font-size: 4em;
+    text-align: center;
+}
+
+aside {
+    position: absolute;
+    width: 240px;
+    right: 0;
+    text-align: right;
+    font-size: small;
+    font-family: sans-serif;
+}
+
+address {
+    text-align: right;
+    font-size: 0.875em;
+}
+
+img {
+    max-width: 100%;
+}
+
+a {
+    color: #e6072a;
+    text-decoration: none;
+}
+a:visited {
+    /*color: #b58900;*/ /* Brownish orange thing from earlier */
+    color: #cb4b16;
+}
+
+/*
+ * A better looking default horizontal rule
+ */
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/*
+ * Remove the gap between images and the bottom of their containers: h5bp.com/i/440
+ */
+
+img {
+    vertical-align: middle;
+}

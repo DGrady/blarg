@@ -1,0 +1,78 @@
+<!doctype html>
+<html class="no-js" lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+		<title>Learning D3 by building a Cartesian grid plugin — D4N G</title>
+		
+		<meta name="description" content="">
+		<meta name="date" content="2014-04-18" />
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+		<link rel="stylesheet" href="/res/vendor/normalize.css">
+		<link rel="stylesheet" href="/res/vendor/h5bp/main.css">
+		<script src="/res/vendor/modernizr-2.8.3.min.js"></script>
+
+		<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+
+		
+		<script src="/res/plugins.js"></script>
+		<script src="/res/main.js"></script>
+		
+		<link rel="stylesheet" href="/res/style.css">
+
+		<link rel="stylesheet" href="d3-grid.css">
+		<script src="/res/vendor/d3.js"></script>
+		<script src="d3-grid.js"></script>
+		<script src="examples.js"></script>
+		
+	</head>
+	<body>
+		<!--[if lt IE 8]>
+			<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+		<![endif]-->
+
+		<header>
+			<span class="byline"><time>2014-04-18</time> / <a href="/">Daniel Grady</a></span>
+			<h1>Learning D3 by building a Cartesian grid plugin</h1>
+		</header>
+		<p><a href="//d3js.org">D3</a> is a JavaScript library that's aimed at helping you make visualizations of data. It makes use of some powerful and challenging ideas, like declarative data binding to produce enter, update, and exit selections, and parity between transitions and selections. Getting started with D3 is quick and easy because of the wealth of examples that Mike Bostock and others have produced, but as I began to work on implementing my own reusable components, I had a hard time understanding how to modify or extend some of the behaviors that have become a hallmark of the library, in particular the <a href="https://github.com/mbostock/d3/wiki/SVG-Axes"><code>axis</code> component</a>.</p>
+<div id="axis-example" class="marginal">
+
+</div>
+<p>As you would expect from a graphics library, the axis component (working with the scale component) takes care of automatically placing tick marks and labels, but it also works seamlessly with transitions. When you use a transition to update the scale associated with an axis, the axis and all tick marks on it will smoothly fade and slide into their new positions. You can see an example of this by clicking on the graph at right and watching the white grid lines. This component does something relatively simple but uses all of D3's core ideas, so to improve my own understanding of D3, I built a new component based on <code>d3.svg.axis</code> that draws a Cartesian grid. This was (at least for me) not nearly as straightforward as I figured it would be, and in case anyone else out there is curious about how the axis component works, this <a href="//dgrady.github.io/d3-grid/">annotated source code</a> could be a good entry point. Aside from a detailed and running explanation of what's happening, the grid plugin doesn't handle drawing text or domain paths like the axis component does, so it's a bit simpler.</p>
+<div id="example" class="marginal">
+
+</div>
+<p>Although this project was mainly about the learning experience, a grid component can make some kinds of charts simpler to draw. Standard practice for drawing a grid in the D3 community is to use an axis but extend the tick marks to cover the entire chart width; this is exactly what's done in the example above. But if you want to use axes and a grid in the same chart, as shown at right, you have to <a href="//bl.ocks.org/mbostock/4349486">coordinate the two components yourself</a>, which can become a bit complicated once you start adding transitions. Instead, it's (marginally) nicer to have a separate, explicit component that's linked to the tick marks.</p>
+<p><code>d3.svg.axis</code> is designed to handle linear (continuous), time, and ordinal scales, and the <code>d3.svg.grid</code> component works with all three as well:</p>
+<figure>
+    <div id="scatter-example" style="display: inline-block; width: 49%"></div>
+    <div id="ordinal-example" style="display: inline-block; width: 49%"></div>
+</figure>
+<p>The annotated source code is <a href="//github.com/DGrady/d3-grid">available on Github</a>. Writing this helped me understand D3's transitions, and I hope my explanation helps you too.</p>
+		<footer>
+			<address>✉ the letter “d” at this domain</address>
+			<ol class="breadcrumbs">
+				<li><a href="/">D4N G</a></li>
+				<li><a href="public/d3-grid/">D3 grid</a></li>
+			</ol>
+			<p>© 2014 Daniel Grady</p>
+		</footer>
+
+
+		<!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+		<script>
+			(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+			function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+			e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+			e.src='//www.google-analytics.com/analytics.js';
+			r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+			ga('create','UA-XXXXX-X','auto');ga('send','pageview');
+		</script>
+	</body>
+</html>
