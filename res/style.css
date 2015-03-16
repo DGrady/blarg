@@ -121,3 +121,7 @@ figure {
     font-family: 'Exo 2', sans-serif;
     font-size: smaller;    
 }
+
+img {
+    width: 100%;
+}
