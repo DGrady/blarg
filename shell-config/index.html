@@ -1,0 +1,268 @@
+<!doctype html>
+<html class="no-js" lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+		<title>Configuring your shell — D4N G</title>
+		
+		<meta name="description" content="">
+		<meta name="date" content="2015-12-20" />
+		
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+		<link rel="stylesheet" href="/res/vendor/normalize.css">
+		<link rel="stylesheet" href="/res/vendor/h5bp/main.css">
+		<script src="/res/vendor/modernizr-2.8.3.min.js"></script>
+
+		<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+		
+		<script src="/res/plugins.js"></script>
+		<script src="/res/main.js"></script>
+		
+		<link rel="stylesheet" href="/res/style.css">
+
+		<style>
+    tr:nth-child(even){
+        background: lightgray;
+    }
+</style>
+		
+	</head>
+	<body>
+		<header>
+			<span class="byline"><time>2015-12-20</time> / <a href="/">Daniel Grady</a></span>
+			<h1>Configuring your shell</h1>
+		</header>
+		<p>Fiddling with shell dot files is a great way to spend a few hours and learn more about how these utilities work. One of the most confusing things for me was understanding exactly what happens when a shell starts up, what files it reads for startup settings and commands, and where it's appropriate to put different kinds of configuration, and these notes summarize what I learned while looking in to those questions.</p>
+<h1 id="shells">Shells?</h1>
+<p>A <a href="https://en.wikipedia.org/wiki/Shell_(computing)">shell</a> is a command-line interface to a computer's operating system. Shells are <em>different</em> interfaces than the more familiar graphical interfaces; GUIs do not (necessarily) &quot;run on top&quot; of a shell, and a CLI and GUI can (and often are) both used on the same system for different kinds of tasks. Today it appears to be most common to run a shell within a graphical interface using a terminal emulation program.</p>
+<p>I only discuss <a href="bash">Bash</a> and <a href="zsh" class="uri">zsh</a> here; these are the shells I've had experience with. Most operating systems today use Bash as the default shell, but come bundled with several alternatives that usually include sh, csh, ksh, tcsh, and zsh. The history of these shells is <a href="http://superuser.com/questions/61727/why-is-bash-everywhere-in-most-if-not-all-linux-distributions">an intricate and undoubtedly fascinating subject</a>. I am going to caricature this rich history with an inaccurate summarization:</p>
+<p>There used to be lots of different shells in widespread use, but the Bourne shell (sh, released in 1977) achieved critical mass and became a de facto standard. The GNU Project needed an open-source shell for their operating system and wrote the Bourne-again shell (bash, released 1989), which took ideas not only from the Bourne shell but all its competitors as well. Bash has since become an even more firmly entrenched de facto standard than any other shell ever. It's the default shell on almost every POSIX system, and in fact many systems no longer include a stand-alone version of sh; running <code>sh</code> actually runs <code>bash</code> in Bourne-shell compatibility mode. The Z Shell (zsh, released 1990) is yet another shell that's slightly newer, with possibly slightly fancier features than bash, in some situations.</p>
+<p>All of these shells (sh, csh, ksh, bash, zsh, and many others) are in the same family; it's the family of shells that led to the official standardization of a POSIX-compliant shell. Consequently, they're all pretty similar in many important ways. Bash and zsh have definitely subsumed all the good ideas from all the others, and definitely have the majority of mind share and development effort behind them today. There have been other efforts at designing different kinds of shells; the friendly interactive shell (fish, released 2005) is an example. It's hard for me to tell if fish is gaining popularity, and it's not included with an OS distributions I'm aware of at this time.</p>
+<p>Shells have historically tried to solve two problems: providing an interface for interactive computer use, <em>and also</em> providing a programming language for writing scripts. Everything available today that calls itself a command shell has a syntax that's more or less inspired by the Bourne shell. Although Bash, zsh, and fish have over time done many things to improve the programming language part of these shells, many computing professionals (and I'm one of them) definitely recommend that you use Python, Ruby, etc for writing programs (even simple programs), and confine the shell to interactive work.</p>
+<p>The two takeaway points, for me, are 1) pick one shell and stick with, and 2) that shell should be Bash or zsh.</p>
+<h1 id="what-a-shell-does-when-it-starts">What a shell does when it starts</h1>
+<p>Figuring out why your shell's environment looks the way it does is almost always a matter of figuring out what files your shell is sourcing at startup, and that's affected by whether you're using Bash or zsh and also by what mode your shell is invoked with.</p>
+<h2 id="a-shell-can-be-invoked-in-four-different-ways">A shell can be invoked in four different ways</h2>
+<p>Shells have several different modes of operation that affect what files they read on startup and also they way they behave. The two most important modes are interactive versus non-interactive, and login versus non-login. Both Bash and zsh allow you to invoke them in one of four different ways, depending on how those options are set. You're normally dealing with interactive shells; anytime you're typing commands in a shell running in a terminal, it's an interactive shell. You might also use non-interactive shells, for example to run a script; if you've ever run a script by typing <code>bash ./my-script.sh</code>, the shell that executed that script was a non-interactive, non-login shell. A login shell is created for you by the system every time you make a new <code>ssh</code> connection, or every time you log in through a terminal on some Linux distributions. Shells that you subsequently create, for example by typing <code>bash</code> inside a login shell, are non-login shells. One of the most important differences between these different operating modes is that the shell will source different configuration files on startup depending on what mode it's in.</p>
+<p>Further details are provided in <code>man bash</code>:</p>
+<blockquote>
+<p>A login shell is one whose first character of argument zero is a <code>-</code>, or one started with the <code>--login</code> option.</p>
+<p>An interactive shell is one started without non-option arguments and without the <code>-c</code> option whose standard input and error are both connected to terminals (as determined by <code>isatty(3)</code>), or one started with the <code>-i</code> option. <code>PS1</code> is set and <code>$-</code> includes <code>i</code> if bash is interactive, allowing a shell script or a startup file to test this state.</p>
+</blockquote>
+<p>Some other helpful notes about these differences:</p>
+<ul>
+<li>How to test what mode your current shell is in:
+<ul>
+<li>Bash: test the <code>login_shell</code> option and test for the presence of <code>i</code> in <code>$-</code></li>
+<li>zsh: test the <code>login</code> and <code>interactive</code> options</li>
+</ul></li>
+<li>Login shells can be created by other programs even after you're logged in to a system. For example, Terminal.app on Mac OS X always creates a login shell, and <code>tmux</code> creates login shells by default.</li>
+<li>Figuring out what shell is currently running from within the shell itself (as opposed to just figuring out what mode the shell is using) is actually pretty difficult to do robustly. See <a href="http://stackoverflow.com/questions/3327013/how-to-determine-the-current-shell-im-working-on" class="uri">http://stackoverflow.com/questions/3327013/how-to-determine-the-current-shell-im-working-on</a></li>
+<li>Further reading:
+<ul>
+<li><a href="http://unix.stackexchange.com/questions/38175/difference-between-login-shell-and-non-login-shell" class="uri">http://unix.stackexchange.com/questions/38175/difference-between-login-shell-and-non-login-shell</a></li>
+<li><a href="http://unix.stackexchange.com/questions/26676/how-to-check-if-a-shell-is-login-interactive-batch" class="uri">http://unix.stackexchange.com/questions/26676/how-to-check-if-a-shell-is-login-interactive-batch</a></li>
+<li><a href="http://unix.stackexchange.com/questions/110737/how-would-i-detect-a-non-login-shell-in-zsh" class="uri">http://unix.stackexchange.com/questions/110737/how-would-i-detect-a-non-login-shell-in-zsh</a></li>
+<li><a href="http://zsh.sourceforge.net/Guide/zshguide02.html" class="uri">http://zsh.sourceforge.net/Guide/zshguide02.html</a></li>
+</ul></li>
+</ul>
+<h2 id="the-files-that-a-shell-sources-at-startup">The files that a shell sources at startup</h2>
+<p>Bash and zsh use different startup files, and they also use different subsets of their startup files depending on how they're invoked.</p>
+<p>For Bash, if it's a login shell, it will will first always source <code>/etc/profile</code> and then source the first (and <em>only</em> the first) of <code>~/.bash_profile</code>, <code>~/.bash_login</code>, or <code>~/.profile</code> that it finds. If it's not a login shell but it is interactive, it sources <code>~/.bashrc</code> only — Bash does <em>not</em> source any system-wide configuration in this case. If the shell it non-interactive and non-login, then Bash will try to expand the environment variable <code>BASH_ENV</code> and source the file it points to.</p>
+<p>zsh's scheme appears more complicated, but is actually a little easier to manage in practice. zsh uses four pairs of configuration files (so eight files total); we can call the pairs environment, profile, resource, and login. Each pair of files includes a global, system-wide file and a user-specific file that lives in your home directory. The profile and login pairs are redundant, and the <a href="http://zsh.sourceforge.net/Intro/intro_3.html">zsh documentation</a> recommends that you only use one, and I'll assume that's profile. Each pair is intended to cover a particular case: the environment pair covers configuration settings that should apply to every single instance of zsh, no matter what mode it's operating in; the profile pair is supposed to include login-only configuration; and the resource pair is supposed to include only configuration that's used in interactive sessions. Every time zsh is invoked, it iterates through these eight configuration files (or a subset of them) in a predictable order.</p>
+<p>This table summarizes the different startup configuration files that Bash and zsh use.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Interactive<br />login</th>
+<th style="text-align: left;">Non-interactive<br />login</th>
+<th style="text-align: left;">Interactive<br />non-login</th>
+<th style="text-align: left;">Non-interactive<br />non-login</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Bash</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>/etc/profile</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>~/.bash_profile</code>, <code>~/.bash_login</code>, <code>~/.profile</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>~/.bashrc</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>BASH_ENV</code></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">x</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>zsh</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>/etc/zshenv</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>$ZDOTDIR/.zshenv</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>/etc/zprofile</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>$ZDOTDIR/.zprofile</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>/etc/zshrc</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>$ZDOTDIR/.zshrc</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>/etc/zlogin</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"><code>$ZDOTDIR/.zlogin</code></td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;">x</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<p>Some other notes about this:</p>
+<ul>
+<li>Both shells offer some mechanisms for overriding the startup files, but these aren't important for this discussion about how to setup your default shell configuration. If you're interested:
+<ul>
+<li>Bash provides the <code>--noprofile</code>, <code>--norc</code>, and <code>--rcfile</code> options.</li>
+<li>zsh: <code>/etc/zshenv</code> is always read no matter what. Prior to reading every subsequent startup file, zsh checks <code>RCS</code>; if it's unset, then no further startup files are read. Prior to reading any startup file under <code>/etc</code> (and after checking <code>RCS</code>), zsh checks <code>GLOBAL_RCS</code>; if it's unset zsh skips that file.</li>
+</ul></li>
+<li>In zsh, it is <em>not</em> possible to disable or override the <code>/etc/zshenv</code> file; every instance of zsh, no matter what, reads commands from this file.</li>
+<li>Bash won't source your <code>~/.bashrc</code> by default for interactive login shells; the convention for working around this is to just manually <code>source ~/.bashrc</code> at the end of <code>~/.bash_profile</code>.</li>
+<li>Bash does not ever look for a file named <code>/etc/bashrc</code>. Many systems do have such a file, but it's a convention, and Bash will never look at it unless another startup file explicitly sources <code>/etc/bashrc</code>.</li>
+<li>Bash uses the <code>readline</code> library to handle line editing, and there are different ways to configure readline. Bash provides a builtin command for setting readline options and binding commands. <code>~/.inputrc</code> is another way to do it which affects any instance of readline (so not just Bash, but other programs that use readline as well). zsh uses the <a href="http://zsh.sourceforge.net/Guide/zshguide04.html">Z-Shell line editor</a>.</li>
+</ul>
+<h1 id="what-should-go-where">What should go where?</h1>
+<p>So, given this explanation of when and which files Bash and zsh use when they start up, what should we put in these files to maximally leverage our shells? Opinions differ, and here are mine.</p>
+<p>The main guiding principle is to keep things simple. Beyond that, another good guiding principle is to try and separate <em>environment configuration</em> from <em>interactive configuration</em>. Things that affect your environment (for example, setting environment variables like <code>PATH</code>) should go into login-shell-specific configuration files, rather than interactive-shell-specific configuration files. The reason for this is that you would like to retain as much control as possible over the environment of the child processes you launch from your interactive login shell. For example, if you ensure that any commands which alter your <code>PATH</code> stay in login-specific config files, then you can experiment with other versions of programs or interpreters by launching a child shell with the path to those programs prepended, for example</p>
+<pre><code>PATH=&quot;./bin/fancy-new-thing:$PATH&quot; bash</code></pre>
+<p>will launch a new shell that uses any binary in that folder by default. However, if <code>~/.bashrc</code> contains commands that alter <code>PATH</code>, this won't work reliably. This sort of situation can affect shells started within other programs as well, like Emacs. In general, try to configure your environment a single time, once, for the login shell, and allow any further child shells to inherit whatever environment is current when they're invoked.</p>
+<p>If you agree with this principle, these recommendations follow naturally from it:</p>
+<ul>
+<li>Good candidates for inclusion in <code>~/.bash_profile</code> or <code>~/.zprofile</code> include
+<ul>
+<li>setting <code>PATH</code></li>
+<li>setting most other environment variables</li>
+</ul></li>
+<li>Good candidates for inclusion in <code>~/.bashrc</code> or <code>~/.zshrc</code> are anything that has to do with your own interactive use of the shell, things like
+<ul>
+<li>aliases</li>
+<li>environment variables related to interactive use, like <code>EDITOR</code> or <code>GREP_OPTIONS</code></li>
+<li>setting up a fancy shell prompt</li>
+<li>adjusting keybindings or other features of the line editor (<code>readline</code> or <code>zle</code>, depending)</li>
+</ul></li>
+</ul>
+<p>Finally, I'll end with a suggestion for debugging your shell configuration. If you're trying to figure out why your <code>PATH</code> or some other part of your shell isn't set the way you expect, a good place to start are the system configuration files. It would be nice if distribution-provided configuration files were always useful examples of best practices, but unfortunately it's not the case.</p>
+<ul>
+<li>Mac OS X 10.5 (?) through 10.10 included an <code>/etc/zshenv</code> file that did the same thing as <code>/etc/profile</code> — every instance of zsh was consequently calling out to their <code>path_helper</code> program to set <code>PATH</code>. This should have been in <code>/etc/zprofile</code>, and in 10.11 that's where they moved it. (See these mailing list messages: <a href="http://www.zsh.org/mla/users/2015/msg00727.html">one</a> and <a href="http://www.zsh.org/mla/users/2013/msg00096.html">two</a>.)</li>
+<li>CentOS 6 (and I assume Red Hat Enterprise Linux 6 as well) provided an <code>/etc/bashrc</code> file that did the same thing as <code>/etc/profile</code>, which included changing the umask and many other things. I'm not sure what the reasoning for this was.</li>
+</ul>
+<h1 id="an-unstructured-list-of-other-useful-references">An unstructured list of other useful references</h1>
+<ul>
+<li><a href="https://github.com/rbenv/rbenv/wiki/Unix-shell-initialization" class="uri">https://github.com/rbenv/rbenv/wiki/Unix-shell-initialization</a></li>
+<li><a href="http://superuser.com/questions/968942/why-does-tmux-create-new-windows-as-login-shells-by-default" class="uri">http://superuser.com/questions/968942/why-does-tmux-create-new-windows-as-login-shells-by-default</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html" class="uri">https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html</a></li>
+<li><a href="http://www.linuxfromscratch.org/blfs/view/svn/postlfs/profile.html" class="uri">http://www.linuxfromscratch.org/blfs/view/svn/postlfs/profile.html</a></li>
+<li><a href="http://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout" class="uri">http://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout</a></li>
+<li><a href="http://zsh.sourceforge.net/FAQ/" class="uri">http://zsh.sourceforge.net/FAQ/</a></li>
+<li><a href="http://strcat.de/zsh/" class="uri">http://strcat.de/zsh/</a></li>
+<li><a href="http://stackoverflow.com/questions/5163144/what-are-the-special-dollar-sign-shell-variables" class="uri">http://stackoverflow.com/questions/5163144/what-are-the-special-dollar-sign-shell-variables</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html" class="uri">https://www.gnu.org/software/bash/manual/html_node/Special-Parameters.html</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/html_node/Variable-Index.html" class="uri">https://www.gnu.org/software/bash/manual/html_node/Variable-Index.html</a></li>
+<li><a href="http://zsh.sourceforge.net/Doc/Release/Variables-Index.html" class="uri">http://zsh.sourceforge.net/Doc/Release/Variables-Index.html</a></li>
+</ul>
+<div id="references" class="references">
+
+</div>
+		<footer>
+			<address>✉ the letter “d” at this domain</address>
+			<ol class="breadcrumbs">
+				<li><a href="/">D4N G</a></li>
+				<li><a href="/shell-config/">Configuring your shell</a></li>
+			</ol>
+			<p>© 2015 Daniel Grady</p>
+		</footer>
+	</body>
+</html>
